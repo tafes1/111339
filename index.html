@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>111339</title>
+  <link href="https://fonts.googleapis.com/css2?family=anton&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #222;
+      color: #eee;
+      text-align: center;
+      padding: 20px;
+      user-select: none;
+      margin: 0;
+    }
+    #tabs {
+      margin-bottom: 15px;
+    }
+    .tab {
+      display: inline-block;
+      padding: 10px 20px;
+      cursor: pointer;
+      background: #333;
+      margin-right: 5px;
+      border-radius: 5px 5px 0 0;
+      user-select: none;
+      font-weight: bold;
+      color: #aaa;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .tab.active {
+      background: #555;
+      color: #fff;
+    }
+    #content > div {
+      display: none;
+    }
+    #content > div.active {
+      display: block;
+    }
+    #meme-canvas {
+      border: 1px solid #444;
+      max-width: 100%;
+      margin: 10px auto 0;
+      display: block;
+    }
+    input, button {
+      margin: 8px 5px;
+      padding: 8px 15px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 5px;
+      background: #444;
+      color: #eee;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    input[type="file"], input[type="text"] {
+      background: #333;
+      color: #eee;
+    }
+    button:hover {
+      background: #666;
+    }
+    footer {
+      font-size: 0.8rem;
+      color: #888;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body oncontextmenu="return false;">
+  <h1>111339</h1>
+
+  <div id="tabs">
+    <div class="tab active" data-tab="normal">Gerador Normal</div>
+    <div class="tab" data-tab="bandeira">Com Bandeira Gay</div>
+  </div>
+
+  <div id="content">
+    <div id="normal" class="active">
+      <input type="file" id="imgNormal" accept="image/*" />
+      <br />
+      <input type="text" id="topNormal" placeholder="Texto Superior" />
+      <input type="text" id="bottomNormal" placeholder="Texto Inferior" />
+      <br />
+      <button id="btnGenNormal">Gerar</button>
+      <button id="btnDownloadNormal" style="display:none;">Baixar</button>
+    </div>
+
+    <div id="bandeira">
+      <input type="file" id="imgFlag" accept="image/*" />
+      <br />
+      <input type="text" id="topFlag" placeholder="Texto Superior" />
+      <input type="text" id="bottomFlag" placeholder="Texto Inferior" />
+      <br />
+      <button id="btnGenFlag">Gerar</button>
+      <button id="btnDownloadFlag" style="display:none;">Baixar</button>
+    </div>
+  </div>
+
+  <canvas id="canvas" width="500" height="500"></canvas>
+
+  <footer>Por T4fz</footer>
+
+  <script>
+    const tabs = document.querySelectorAll('.tab');
+    const contents = document.querySelectorAll('#content > div');
+    tabs.forEach(t => {
+      t.onclick = () => {
+        tabs.forEach(x => x.classList.remove('active'));
+        contents.forEach(c => c.classList.remove('active'));
+        t.classList.add('active');
+        document.getElementById(t.dataset.tab).classList.add('active');
+        clearCanvas();
+      }
+    });
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    const states = {
+      normal: {
+        imgInput: document.getElementById('imgNormal'),
+        topText: document.getElementById('topNormal'),
+        bottomText: document.getElementById('bottomNormal'),
+        genBtn: document.getElementById('btnGenNormal'),
+        downBtn: document.getElementById('btnDownloadNormal'),
+        img: new Image()
+      },
+      bandeira: {
+        imgInput: document.getElementById('imgFlag'),
+        topText: document.getElementById('topFlag'),
+        bottomText: document.getElementById('bottomFlag'),
+        genBtn: document.getElementById('btnGenFlag'),
+        downBtn: document.getElementById('btnDownloadFlag'),
+        img: new Image()
+      }
+    }
+
+    function capitalize(str) {
+      return str.replace(/\w\S*/g, w => w[0].toUpperCase() + w.substr(1).toLowerCase());
+    }
+
+    Object.values(states).forEach(state => {
+      state.imgInput.onchange = e => {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          state.img.src = ev.target.result;
+          state.img.onload = () => {
+            canvas.width = state.img.width;
+            canvas.height = state.img.height;
+            clearCanvas();
+            draw(currentTab());
+          }
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+
+    function currentTab() {
+      return document.querySelector('.tab.active').dataset.tab;
+    }
+
+    function draw(tab) {
+      const state = states[tab];
+      if(!state.img.src) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(state.img, 0, 0);
+
+      if(tab === 'bandeira') drawFlag();
+
+      const size = canvas.width / 8;
+      ctx.font = `bold ${size}px Anton, Impact, Arial, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.lineWidth = size / 8;
+      ctx.strokeStyle = 'black';
+      ctx.fillStyle = 'white';
+      ctx.lineJoin = 'round';
+
+      ctx.textBaseline = 'top';
+      drawText(capitalize(state.topText.value), canvas.width/2, 10);
+
+      ctx.textBaseline = 'bottom';
+      drawText(capitalize(state.bottomText.value), canvas.width/2, canvas.height-10);
+    }
+
+    function drawText(text, x, y){
+      ctx.strokeText(text, x, y);
+      ctx.fillText(text, x, y);
+    }
+
+    function drawFlag(){
+      const height = canvas.height/6;
+      const colors = ['#E40303','#FF8C00','#FFED00','#008026','#004DFF','#750787'];
+      ctx.save();
+      ctx.globalAlpha = 0.25;
+      for(let i=0; i<colors.length; i++){
+        ctx.fillStyle = colors[i];
+        ctx.fillRect(0, i*height, canvas.width, height);
+      }
+      ctx.restore();
+    }
+
+    function clearCanvas(){
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      Object.values(states).forEach(s => s.downBtn.style.display = 'none');
+    }
+
+    Object.entries(states).forEach(([tab, state]) => {
+      state.genBtn.onclick = () => {
+        if(!state.img.src){
+          alert('Selecione uma imagem primeiro.');
+          return;
+        }
+        draw(tab);
+        state.downBtn.style.display = 'inline-block';
+      }
+      state.downBtn.onclick = () => {
+        const a = document.createElement('a');
+        a.href = canvas.toDataURL('image/png');
+        a.download = '111339.png';
+        a.click();
+      }
+    });
+  </script>
+</body>
+</html>
