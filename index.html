@@ -61,7 +61,7 @@
 </head>
 <body>
   <div class="container">
-        <img src="um.jpg" alt="Foto" class="foto">
+        <img src="um.jpg" alt="foto" class="foto">
     <div class="heart">♥</div>
     <h1>sofi...</h1>
     <p>só de lembrar do teu jeito, fico duro</p>
@@ -72,5 +72,18 @@
     <p>fico louco só de pensar em te deixar molhada, tremendo</p>
     <p>e gozar junto contigo, bem suado, bem safado</p>
   </div>
+
+<script>
+  document.addEventListener('contextmenu', event => event.preventDefault());
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'F12' || 
+        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
+        (e.ctrlKey && e.key === 'U')) {
+      e.preventDefault();
+      return false;
+    }
+  });
+</script>
+
 </body>
 </html>
