@@ -8,8 +8,8 @@
     body {
       margin: 0;
       padding: 0;
-      background: #0e0000;
-      color: #f2f2f2;
+      background: #2b1a00;
+      color: #ffcc66;
       font-family: sans-serif;
       display: flex;
       flex-direction: column;
@@ -17,14 +17,14 @@
       justify-content: center;
       min-height: 100vh;
       text-align: center;
-      background-image: radial-gradient(circle at top left, #330000, #0e0000);
+      background-image: radial-gradient(circle at top left, #664400, #2b1a00);
     }
     .container {
       max-width: 600px;
       padding: 30px 20px;
     }
     h1 {
-      color: #ff1a1a;
+      color: #ffcc66;
       font-size: 2.6em;
       margin-bottom: 0.4em;
       text-transform: lowercase;
@@ -37,7 +37,7 @@
     }
     .heart {
       font-size: 2.5em;
-      color: #cc0000;
+      color: #ffcc66;
       animation: pulse 1.5s infinite;
       margin-bottom: 0.6em;
     }
@@ -53,15 +53,15 @@
       object-fit: cover;
       border-radius: 50%;
       margin-bottom: 10px;
-      border: 3px solid #cc0000;
-      box-shadow: 0 0 8px #ff1a1a;
+      border: 3px solid #ffcc66;
+      box-shadow: 0 0 8px #ffcc66;
     }
 
   </style>
 </head>
 <body>
   <div class="container">
-        <img src="um.jpg" alt="foto" class="foto">
+    <img src="um.jpg" alt="foto" class="foto">
     <div class="heart">♥</div>
     <h1>abrimeucranio...</h1>
     <p>só de lembrar do teu jeito, fico duro</p>
@@ -73,17 +73,17 @@
     <p>e gozar junto contigo, bem suado, bem safado</p>
   </div>
 
-<script>
-  document.addEventListener('contextmenu', event => event.preventDefault());
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'F12' || 
-        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
-        (e.ctrlKey && e.key === 'U')) {
-      e.preventDefault();
-      return false;
-    }
-  });
-</script>
+  <script>
+    document.addEventListener('contextmenu', event => event.preventDefault());
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'F12' || 
+          (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
+          (e.ctrlKey && e.key === 'U')) {
+        e.preventDefault();
+        return false;
+      }
+    });
+  </script>
 
 </body>
 </html>
