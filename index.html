@@ -1,27 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>AnonMSG - by t4fz</title>
   <style>
     body {
-      background-color: #0f0f0f;
-      color: #00ff88;
+      background: #0b0b0b;
+      color: #00ff99;
       font-family: 'Courier New', monospace;
       padding: 20px;
+      transition: background 0.3s;
     }
     h1 {
-      color: #00ffcc;
-      text-shadow: 0 0 10px #00ffcc;
       text-align: center;
+      color: #00ffee;
+      text-shadow: 0 0 10px #00ffee;
     }
     #messageInput, #submitBtn {
       width: 100%;
-      padding: 12px;
       margin-top: 10px;
-      border: none;
+      padding: 12px;
       font-size: 16px;
+      border: none;
     }
     #messageInput {
       background: #111;
@@ -29,7 +30,7 @@
       border: 1px solid #0f0;
     }
     #submitBtn {
-      background-color: #00ff88;
+      background: #00ff99;
       color: #000;
       cursor: pointer;
       font-weight: bold;
@@ -43,7 +44,48 @@
       background: #111;
       border: 1px solid #0f0;
       padding: 10px;
-      margin-bottom: 10px;
+      margin-bottom: 15px;
+      position: relative;
+      transition: all 0.3s ease-in-out;
+    }
+    .author {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 5px;
+    }
+    .time {
+      font-size: 11px;
+      color: #666;
+    }
+    .delBtn, .replyBtn {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      background: #ff0044;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      padding: 3px 6px;
+      margin-left: 5px;
+    }
+    .replyBtn {
+      right: 70px;
+      background: #0077ff;
+    }
+    .replyInput {
+      margin-top: 10px;
+      background: #000;
+      border: 1px solid #0f0;
+      color: #0f0;
+      width: 100%;
+      padding: 8px;
+      font-size: 14px;
+    }
+    .replies {
+      margin-top: 10px;
+      padding-left: 15px;
+      border-left: 1px dashed #0f0;
     }
     footer {
       text-align: center;
@@ -56,20 +98,19 @@
 <body>
 
   <h1>AnonMSG</h1>
-  <textarea id="messageInput" rows="4" placeholder="Digite sua mensagem anônima..."></textarea>
+  <textarea id="messageInput" rows="3" placeholder="Digite sua mensagem anônima..."></textarea>
   <button id="submitBtn">Enviar</button>
 
   <div id="messages"></div>
 
   <footer>by t4fz</footer>
 
-  <!-- Firebase SDKs -->
+  <!-- Firebase SDK -->
   <script type="module">
-    // Importar funções do Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getDatabase, ref, push, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-    // Configuração do Firebase (substitua pelos seus dados se necessário)
+    // Config Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyC8gESV8x78LpjAEzKDqcfG8mM69QouAzI",
       authDomain: "chat139.firebaseapp.com",
@@ -82,22 +123,101 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const msgRef = ref(db, "mensagens");
+
+    // Sala pelo parâmetro URL (?sala=xyz)
+    const sala = new URLSearchParams(window.location.search).get("sala") || "geral";
+    const msgRef = ref(db, `mensagens/${sala}`);
+
+    // ID fixo para o autor
+    if (!localStorage.getItem("anonID")) {
+      const id = Math.floor(1000 + Math.random() * 9000);
+      localStorage.setItem("anonID", `Anon#${id}`);
+    }
+    const anonID = localStorage.getItem("anonID");
 
     // Enviar mensagem
     document.getElementById("submitBtn").addEventListener("click", () => {
       const msg = document.getElementById("messageInput").value.trim();
       if (msg !== "") {
-        push(msgRef, msg);
+        push(msgRef, {
+          text: msg,
+          author: anonID,
+          time: Date.now(),
+          replies: []
+        });
         document.getElementById("messageInput").value = "";
       }
     });
 
     // Mostrar mensagens
     onChildAdded(msgRef, (data) => {
+      const val = data.val();
+      const key = data.key;
+
       const msgBox = document.createElement("div");
       msgBox.className = "msg";
-      msgBox.textContent = data.val();
+
+      const msgText = document.createElement("div");
+      msgText.textContent = val.text;
+      msgBox.appendChild(msgText);
+
+      const author = document.createElement("div");
+      author.className = "author";
+      author.textContent = val.author;
+      msgBox.appendChild(author);
+
+      const time = document.createElement("div");
+      time.className = "time";
+      time.textContent = new Date(val.time).toLocaleString();
+      msgBox.appendChild(time);
+
+      // Botão apagar
+      if (val.author === anonID) {
+        const delBtn = document.createElement("button");
+        delBtn.className = "delBtn";
+        delBtn.textContent = "Apagar";
+        delBtn.onclick = () => {
+          remove(ref(db, `mensagens/${sala}/${key}`));
+          msgBox.remove();
+        };
+        msgBox.appendChild(delBtn);
+      }
+
+      // Botão responder
+      const replyBtn = document.createElement("button");
+      replyBtn.className = "replyBtn";
+      replyBtn.textContent = "Responder";
+      replyBtn.onclick = () => {
+        const replyText = prompt("Digite sua resposta:");
+        if (replyText) {
+          const replyBox = document.createElement("div");
+          replyBox.className = "msg";
+          replyBox.style.background = "#222";
+          replyBox.innerHTML = `<b>${anonID}:</b> ${replyText}`;
+          repliesDiv.appendChild(replyBox);
+          push(ref(db, `mensagens/${sala}/${key}/replies`), {
+            text: replyText,
+            author: anonID,
+            time: Date.now()
+          });
+        }
+      };
+      msgBox.appendChild(replyBtn);
+
+      // Respostas
+      const repliesDiv = document.createElement("div");
+      repliesDiv.className = "replies";
+      msgBox.appendChild(repliesDiv);
+
+      onChildAdded(ref(db, `mensagens/${sala}/${key}/replies`), (repData) => {
+        const rep = repData.val();
+        const replyEl = document.createElement("div");
+        replyEl.className = "msg";
+        replyEl.style.background = "#222";
+        replyEl.innerHTML = `<b>${rep.author}</b>: ${rep.text}<br><span class="time">${new Date(rep.time).toLocaleString()}</span>`;
+        repliesDiv.appendChild(replyEl);
+      });
+
       document.getElementById("messages").prepend(msgBox);
     });
   </script>
