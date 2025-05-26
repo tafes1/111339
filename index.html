@@ -1,91 +1,105 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>pra Isi, minha princesa by d</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AnonMSG - by t4fz</title>
   <style>
     body {
-      margin: 0;
-      padding: 0;
-      background: #ffe6f0;
-      color: #660033;
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      text-align: center;
-      background-image: radial-gradient(circle at top left, #ff99cc, #ffe6f0);
-    }
-    .container {
-      max-width: 600px;
-      padding: 30px 20px;
+      background-color: #0f0f0f;
+      color: #00ff88;
+      font-family: 'Courier New', monospace;
+      padding: 20px;
     }
     h1 {
-      color: #cc0066;
-      font-size: 2.6em;
-      margin-bottom: 0.4em;
-      text-transform: uppercase;
+      color: #00ffcc;
+      text-shadow: 0 0 10px #00ffcc;
+      text-align: center;
     }
-    p {
-      font-size: 1.2em;
-      margin: 0.5em 0;
-      text-transform: lowercase;
-      line-height: 1.6em;
-      color: #660033;
+    #messageInput, #submitBtn {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border: none;
+      font-size: 16px;
     }
-    .heart {
-      font-size: 2.5em;
-      color: #ff3399;
-      animation: pulse 1.5s infinite;
-      margin-bottom: 0.6em;
+    #messageInput {
+      background: #111;
+      color: #0f0;
+      border: 1px solid #0f0;
     }
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
+    #submitBtn {
+      background-color: #00ff88;
+      color: #000;
+      cursor: pointer;
+      font-weight: bold;
     }
-
-    .foto {
-      width: 120px;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 50%;
+    #messages {
+      margin-top: 30px;
+      border-top: 1px dashed #0f0;
+      padding-top: 20px;
+    }
+    .msg {
+      background: #111;
+      border: 1px solid #0f0;
+      padding: 10px;
       margin-bottom: 10px;
-      border: 3px solid #ff3399;
-      box-shadow: 0 0 10px #ff3399;
     }
-
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: #444;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <img src="aa.png" alt="foto" class="foto">
-    <div class="heart">♥</div>
-    <h1>Isi, minha princesa</h1>
-    <p>só de lembrar do teu jeito, fico duro</p>
-    <p>imagino teu corpo se esfregando no meu</p>
-    <p>minha mão apertando tua coxa, descendo devagar</p>
-    <p>pau encostando na tua xereca quente, sentindo tua reação</p>
-    <p>tu se abrindo, gemendo baixinho, pedindo mais</p>
-    <p>fico louco só de pensar em te deixar molhada, tremendo</p>
-    <p>e gozar junto contigo, bem suado, bem safado</p>
-    <p style="margin-top: 2em; font-weight: bold; color: #cc0066;">assinado: deusdodox</p>
-  </div>
 
-  <script>
-    document.addEventListener('contextmenu', event => event.preventDefault());
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'F12' || 
-          (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
-          (e.ctrlKey && e.key === 'U')) {
-        e.preventDefault();
-        return false;
+  <h1>AnonMSG</h1>
+  <textarea id="messageInput" rows="4" placeholder="Digite sua mensagem anônima..."></textarea>
+  <button id="submitBtn">Enviar</button>
+
+  <div id="messages"></div>
+
+  <footer>by t4fz</footer>
+
+  <!-- Firebase SDKs -->
+  <script type="module">
+    // Importar funções do Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    // Configuração do Firebase (substitua pelos seus dados se necessário)
+    const firebaseConfig = {
+      apiKey: "AIzaSyC8gESV8x78LpjAEzKDqcfG8mM69QouAzI",
+      authDomain: "chat139.firebaseapp.com",
+      databaseURL: "https://chat139-default-rtdb.firebaseio.com",
+      projectId: "chat139",
+      storageBucket: "chat139.firebasestorage.app",
+      messagingSenderId: "801011782776",
+      appId: "1:801011782776:web:8d6526bfcd4c3d95fb098d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const msgRef = ref(db, "mensagens");
+
+    // Enviar mensagem
+    document.getElementById("submitBtn").addEventListener("click", () => {
+      const msg = document.getElementById("messageInput").value.trim();
+      if (msg !== "") {
+        push(msgRef, msg);
+        document.getElementById("messageInput").value = "";
       }
     });
-  </script>
 
+    // Mostrar mensagens
+    onChildAdded(msgRef, (data) => {
+      const msgBox = document.createElement("div");
+      msgBox.className = "msg";
+      msgBox.textContent = data.val();
+      document.getElementById("messages").prepend(msgBox);
+    });
+  </script>
 </body>
 </html>
