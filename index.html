@@ -1,92 +1,86 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AnonPaste</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diário Anônimo Coletivo</title>
   <style>
     body {
       background: #1e1e1e;
-      color: #ccc;
+      color: #ddd;
       font-family: sans-serif;
       padding: 20px;
       max-width: 800px;
       margin: auto;
     }
     h1 {
-      color: #f1f1f1;
       text-align: center;
+      color: #f1f1f1;
     }
     textarea {
       width: 100%;
-      height: 200px;
+      height: 150px;
       background: #2c2c2c;
-      color: #f1f1f1;
       border: 1px solid #444;
+      color: #eee;
       padding: 10px;
-      font-family: monospace;
-      font-size: 14px;
+      font-size: 15px;
       resize: vertical;
+      margin-top: 10px;
     }
     button {
-      background: #3a3a3a;
+      background: #444;
       color: #fff;
       border: none;
       padding: 10px 20px;
       margin-top: 10px;
       cursor: pointer;
     }
-    #link {
-      margin-top: 20px;
-      word-break: break-all;
-    }
-    pre {
-      background: #2c2c2c;
-      padding: 15px;
-      border: 1px solid #444;
+    .entry {
+      background: #2a2a2a;
+      border-left: 4px solid #666;
+      padding: 10px 15px;
+      margin-top: 15px;
       white-space: pre-wrap;
-      overflow-x: auto;
+      position: relative;
     }
-    footer {
-      text-align: center;
-      margin-top: 40px;
-      color: #555;
-      font-size: 14px;
-    }
-    #meta {
-      margin-top: 10px;
-      font-size: 13px;
+    .meta {
+      font-size: 12px;
       color: #888;
+      margin-top: 5px;
+    }
+    .report-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #ff5555;
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 12px;
     }
     @media (max-width: 600px) {
       body {
         padding: 10px;
       }
       textarea {
-        height: 150px;
+        height: 120px;
       }
     }
   </style>
 </head>
 <body>
-  <h1>AnonPaste</h1>
+  <h1>Diário Anônimo Coletivo</h1>
 
-  <div id="create">
-    <textarea id="pasteInput" placeholder="Cole seu texto aqui..."></textarea>
-    <button onclick="createPaste()">Gerar link</button>
-    <div id="link"></div>
-  </div>
+  <textarea id="entryInput" placeholder="Escreva sua história, desabafo ou confissão..."></textarea>
+  <button onclick="postEntry()">Publicar</button>
 
-  <div id="view" style="display:none;">
-    <pre id="pasteContent"></pre>
-    <div id="meta"></div>
-  </div>
-
-  <footer>BY T4FZ, REI, BECK E CHAPADO.</footer>
+  <div id="entries"></div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getDatabase, ref, set, get, child, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getDatabase, ref, push, onChildAdded, remove } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyC8gESV8x78LpjAEzKDqcfG8mM69QouAzI",
@@ -100,39 +94,53 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+    const diaryRef = ref(db, 'diario');
+    const reportsRef = ref(db, 'denuncias');
 
-    const pasteId = new URLSearchParams(window.location.search).get("id");
+    const input = document.getElementById('entryInput');
+    const entriesDiv = document.getElementById('entries');
 
-    if (pasteId) {
-      document.getElementById("create").style.display = "none";
-      document.getElementById("view").style.display = "block";
-      const pasteRef = child(ref(db), `pastes/${pasteId}`);
-
-      get(pasteRef).then(snapshot => {
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          document.getElementById("pasteContent").textContent = data.text || data;
-          const currentViews = data.views || 0;
-          const updatedData = typeof data === 'object' ? { ...data, views: currentViews + 1 } : { text: data, views: 1 };
-          update(pasteRef, updatedData);
-          const time = data.createdAt ? new Date(data.createdAt).toLocaleString() : 'desconhecida';
-          document.getElementById("meta").textContent = `Visualizações: ${currentViews + 1} | Criado em: ${time}`;
-        } else {
-          document.getElementById("pasteContent").textContent = "Paste não encontrado.";
-        }
-      });
-    }
-
-    window.createPaste = () => {
-      const text = document.getElementById("pasteInput").value.trim();
+    window.postEntry = () => {
+      const text = input.value.trim();
       if (!text) return;
-      const id = Math.random().toString(36).substring(2, 10);
-      const now = Date.now();
-      set(ref(db, `pastes/${id}`), { text: text, views: 0, createdAt: now }).then(() => {
-        const url = `${location.origin}${location.pathname}?id=${id}`;
-        document.getElementById("link").innerHTML = `Link: <a href='${url}' target='_blank'>${url}</a>`;
+      push(diaryRef, {
+        text,
+        createdAt: Date.now()
       });
+      input.value = '';
     };
+
+    onChildAdded(diaryRef, (data) => {
+      const val = data.val();
+      const key = data.key;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'entry';
+
+      const content = document.createElement('div');
+      content.textContent = val.text;
+      wrapper.appendChild(content);
+
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      meta.textContent = `Publicado em ${new Date(val.createdAt).toLocaleString()}`;
+      wrapper.appendChild(meta);
+
+      const reportBtn = document.createElement('button');
+      reportBtn.className = 'report-btn';
+      reportBtn.textContent = 'Denunciar';
+      reportBtn.onclick = () => {
+        push(reportsRef, {
+          entryId: key,
+          text: val.text,
+          reportedAt: Date.now()
+        });
+        alert("Obrigado! Sua denúncia foi registrada.");
+      };
+      wrapper.appendChild(reportBtn);
+
+      entriesDiv.prepend(wrapper);
+    });
   </script>
 </body>
 </html>
