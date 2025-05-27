@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chat - 111339.xyz</title>
   <style>
     body {
@@ -46,6 +46,7 @@
     }
     .msg {
       margin-bottom: 15px;
+      position: relative;
     }
     .msg .user {
       font-weight: bold;
@@ -57,6 +58,23 @@
     }
     .msg .text {
       margin-top: 2px;
+    }
+    .msg .actions {
+      position: absolute;
+      top: 0;
+      right: 0;
+      display: flex;
+      gap: 5px;
+    }
+    .msg button {
+      background: transparent;
+      border: none;
+      color: #f00;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .msg button.edit {
+      color: #0ff;
     }
     .inputArea {
       display: flex;
@@ -132,7 +150,7 @@
 
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-    import { getDatabase, ref, push, onChildAdded } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+    import { getDatabase, ref, push, onChildAdded, remove, update } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyC8gESV8x78LpjAEzKDqcfG8mM69QouAzI",
@@ -174,9 +192,43 @@
       box.innerHTML = "";
       onChildAdded(messagesRef, (data) => {
         const val = data.val();
+        const key = data.key;
         const msg = document.createElement("div");
         msg.className = "msg";
-        msg.innerHTML = `<div class='user'>${val.user} <span class='time'>${new Date(val.time).toLocaleTimeString()}</span></div><div class='text'>${val.text}</div>`;
+        msg.innerHTML = `
+          <div class='user'>${val.user} <span class='time'>${new Date(val.time).toLocaleTimeString()}</span></div>
+          <div class='text' id='text-${key}'>${val.text}</div>
+        `;
+
+        if (val.user === currentUser) {
+          const actions = document.createElement("div");
+          actions.className = "actions";
+
+          const delBtn = document.createElement("button");
+          delBtn.textContent = "✖";
+          delBtn.title = "Apagar";
+          delBtn.onclick = () => {
+            remove(ref(db, `chat/${currentChannel}/${key}`));
+            msg.remove();
+          };
+
+          const editBtn = document.createElement("button");
+          editBtn.textContent = "✎";
+          editBtn.title = "Editar";
+          editBtn.className = "edit";
+          editBtn.onclick = () => {
+            const newText = prompt("Editar mensagem:", val.text);
+            if (newText && newText !== val.text) {
+              update(ref(db, `chat/${currentChannel}/${key}`), { text: newText });
+              document.getElementById(`text-${key}`).textContent = newText;
+            }
+          };
+
+          actions.appendChild(editBtn);
+          actions.appendChild(delBtn);
+          msg.appendChild(actions);
+        }
+
         box.appendChild(msg);
         box.scrollTop = box.scrollHeight;
       });
