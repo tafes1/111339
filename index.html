@@ -2,121 +2,98 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AnonMSG - by t4fz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AnonPaste</title>
   <style>
     body {
-      background: #0b0b0b;
-      color: #00ff99;
-      font-family: 'Courier New', monospace;
+      background: #1e1e1e;
+      color: #ccc;
+      font-family: sans-serif;
       padding: 20px;
-      transition: background 0.3s;
+      max-width: 800px;
+      margin: auto;
     }
     h1 {
+      color: #f1f1f1;
       text-align: center;
-      color: #00ffee;
-      text-shadow: 0 0 10px #00ffee;
     }
-    #messageInput, #submitBtn {
+    textarea {
       width: 100%;
-      margin-top: 10px;
-      padding: 12px;
-      font-size: 16px;
-      border: none;
-    }
-    #messageInput {
-      background: #111;
-      color: #0f0;
-      border: 1px solid #0f0;
-    }
-    #submitBtn {
-      background: #00ff99;
-      color: #000;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    #messages {
-      margin-top: 30px;
-      border-top: 1px dashed #0f0;
-      padding-top: 20px;
-    }
-    .msg {
-      background: #111;
-      border: 1px solid #0f0;
+      height: 200px;
+      background: #2c2c2c;
+      color: #f1f1f1;
+      border: 1px solid #444;
       padding: 10px;
-      margin-bottom: 15px;
-      position: relative;
-      transition: all 0.3s ease-in-out;
-    }
-    .author {
-      font-size: 12px;
-      color: #aaa;
-      margin-top: 5px;
-    }
-    .time {
-      font-size: 11px;
-      color: #666;
-    }
-    .delBtn, .replyBtn {
-      position: absolute;
-      top: 8px;
-      right: 10px;
-      background: #ff0044;
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-size: 12px;
-      padding: 3px 6px;
-      margin-left: 5px;
-    }
-    .replyBtn {
-      right: 70px;
-      background: #0077ff;
-    }
-    .replyInput {
-      margin-top: 10px;
-      background: #000;
-      border: 1px solid #0f0;
-      color: #0f0;
-      width: 100%;
-      padding: 8px;
+      font-family: monospace;
       font-size: 14px;
+      resize: vertical;
     }
-    .replies {
+    button {
+      background: #3a3a3a;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
       margin-top: 10px;
-      padding-left: 15px;
-      border-left: 1px dashed #0f0;
+      cursor: pointer;
+    }
+    #link {
+      margin-top: 20px;
+      word-break: break-all;
+    }
+    pre {
+      background: #2c2c2c;
+      padding: 15px;
+      border: 1px solid #444;
+      white-space: pre-wrap;
+      overflow-x: auto;
     }
     footer {
       text-align: center;
       margin-top: 40px;
-      color: #444;
+      color: #555;
       font-size: 14px;
+    }
+    #meta {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #888;
+    }
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+      textarea {
+        height: 150px;
+      }
     }
   </style>
 </head>
 <body>
+  <h1>AnonPaste</h1>
 
-  <h1>AnonMSG</h1>
-  <textarea id="messageInput" rows="3" placeholder="Digite sua mensagem anônima..."></textarea>
-  <button id="submitBtn">Enviar</button>
+  <div id="create">
+    <textarea id="pasteInput" placeholder="Cole seu texto aqui..."></textarea>
+    <button onclick="createPaste()">Gerar link</button>
+    <div id="link"></div>
+  </div>
 
-  <div id="messages"></div>
+  <div id="view" style="display:none;">
+    <pre id="pasteContent"></pre>
+    <div id="meta"></div>
+  </div>
 
-  <footer>by t4fz</footer>
+  <footer>BY T4FZ, REI, BECK E CHAPADO.</footer>
 
-  <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getDatabase, ref, set, get, child, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-    // Config Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyC8gESV8x78LpjAEzKDqcfG8mM69QouAzI",
       authDomain: "chat139.firebaseapp.com",
       databaseURL: "https://chat139-default-rtdb.firebaseio.com",
       projectId: "chat139",
-      storageBucket: "chat139.firebasestorage.app",
+      storageBucket: "chat139.appspot.com",
       messagingSenderId: "801011782776",
       appId: "1:801011782776:web:8d6526bfcd4c3d95fb098d"
     };
@@ -124,102 +101,38 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // Sala pelo parâmetro URL (?sala=xyz)
-    const sala = new URLSearchParams(window.location.search).get("sala") || "geral";
-    const msgRef = ref(db, `mensagens/${sala}`);
+    const pasteId = new URLSearchParams(window.location.search).get("id");
 
-    // ID fixo para o autor
-    if (!localStorage.getItem("anonID")) {
-      const id = Math.floor(1000 + Math.random() * 9000);
-      localStorage.setItem("anonID", `Anon#${id}`);
-    }
-    const anonID = localStorage.getItem("anonID");
+    if (pasteId) {
+      document.getElementById("create").style.display = "none";
+      document.getElementById("view").style.display = "block";
+      const pasteRef = child(ref(db), `pastes/${pasteId}`);
 
-    // Enviar mensagem
-    document.getElementById("submitBtn").addEventListener("click", () => {
-      const msg = document.getElementById("messageInput").value.trim();
-      if (msg !== "") {
-        push(msgRef, {
-          text: msg,
-          author: anonID,
-          time: Date.now(),
-          replies: []
-        });
-        document.getElementById("messageInput").value = "";
-      }
-    });
-
-    // Mostrar mensagens
-    onChildAdded(msgRef, (data) => {
-      const val = data.val();
-      const key = data.key;
-
-      const msgBox = document.createElement("div");
-      msgBox.className = "msg";
-
-      const msgText = document.createElement("div");
-      msgText.textContent = val.text;
-      msgBox.appendChild(msgText);
-
-      const author = document.createElement("div");
-      author.className = "author";
-      author.textContent = val.author;
-      msgBox.appendChild(author);
-
-      const time = document.createElement("div");
-      time.className = "time";
-      time.textContent = new Date(val.time).toLocaleString();
-      msgBox.appendChild(time);
-
-      // Botão apagar
-      if (val.author === anonID) {
-        const delBtn = document.createElement("button");
-        delBtn.className = "delBtn";
-        delBtn.textContent = "Apagar";
-        delBtn.onclick = () => {
-          remove(ref(db, `mensagens/${sala}/${key}`));
-          msgBox.remove();
-        };
-        msgBox.appendChild(delBtn);
-      }
-
-      // Botão responder
-      const replyBtn = document.createElement("button");
-      replyBtn.className = "replyBtn";
-      replyBtn.textContent = "Responder";
-      replyBtn.onclick = () => {
-        const replyText = prompt("Digite sua resposta:");
-        if (replyText) {
-          const replyBox = document.createElement("div");
-          replyBox.className = "msg";
-          replyBox.style.background = "#222";
-          replyBox.innerHTML = `<b>${anonID}:</b> ${replyText}`;
-          repliesDiv.appendChild(replyBox);
-          push(ref(db, `mensagens/${sala}/${key}/replies`), {
-            text: replyText,
-            author: anonID,
-            time: Date.now()
-          });
+      get(pasteRef).then(snapshot => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          document.getElementById("pasteContent").textContent = data.text || data;
+          const currentViews = data.views || 0;
+          const updatedData = typeof data === 'object' ? { ...data, views: currentViews + 1 } : { text: data, views: 1 };
+          update(pasteRef, updatedData);
+          const time = data.createdAt ? new Date(data.createdAt).toLocaleString() : 'desconhecida';
+          document.getElementById("meta").textContent = `Visualizações: ${currentViews + 1} | Criado em: ${time}`;
+        } else {
+          document.getElementById("pasteContent").textContent = "Paste não encontrado.";
         }
-      };
-      msgBox.appendChild(replyBtn);
-
-      // Respostas
-      const repliesDiv = document.createElement("div");
-      repliesDiv.className = "replies";
-      msgBox.appendChild(repliesDiv);
-
-      onChildAdded(ref(db, `mensagens/${sala}/${key}/replies`), (repData) => {
-        const rep = repData.val();
-        const replyEl = document.createElement("div");
-        replyEl.className = "msg";
-        replyEl.style.background = "#222";
-        replyEl.innerHTML = `<b>${rep.author}</b>: ${rep.text}<br><span class="time">${new Date(rep.time).toLocaleString()}</span>`;
-        repliesDiv.appendChild(replyEl);
       });
+    }
 
-      document.getElementById("messages").prepend(msgBox);
-    });
+    window.createPaste = () => {
+      const text = document.getElementById("pasteInput").value.trim();
+      if (!text) return;
+      const id = Math.random().toString(36).substring(2, 10);
+      const now = Date.now();
+      set(ref(db, `pastes/${id}`), { text: text, views: 0, createdAt: now }).then(() => {
+        const url = `${location.origin}${location.pathname}?id=${id}`;
+        document.getElementById("link").innerHTML = `Link: <a href='${url}' target='_blank'>${url}</a>`;
+      });
+    };
   </script>
 </body>
 </html>
