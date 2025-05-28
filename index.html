@@ -1,107 +1,128 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CASO NAXX - Denúncia Digital</title>
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>111339</title>
+<style>
+    * {
+      box-sizing: border-box;
+    }
     body {
-      font-family: 'Arial', sans-serif;
-      background-color: #fff;
-      color: #111;
       margin: 0;
-      padding: 0;
+      font-family: monospace;
+      background: linear-gradient(180deg, #0d0d0d, #111);
+      color: #e0e0e0;
+      user-select: none;
     }
     header {
-      background-color: #b20000;
-      padding: 30px 20px;
-      color: #fff;
+      background-color: #111;
+      padding: 1rem;
       text-align: center;
+      border-bottom: 1px solid #444;
     }
-    h1 {
-      font-size: 2.4rem;
-      margin: 0;
-    }
-    .subheader {
-      font-size: 1rem;
-      margin-top: 10px;
-      color: #f2f2f2;
-    }
-    .content {
-      max-width: 800px;
+    main {
+      padding: 1.5rem;
+      max-width: 900px;
       margin: auto;
-      padding: 30px 20px;
-      line-height: 1.7;
     }
     h2 {
-      color: #b20000;
-      margin-top: 30px;
+      color: #80ffea;
+      transition: text-shadow 0.3s ease;
     }
-    blockquote {
-      border-left: 4px solid #b20000;
-      padding-left: 15px;
-      font-style: italic;
-      color: #555;
-      background-color: #f9f9f9;
-      padding: 10px;
+    h2 {
+      color: #80ffea;
+      text-shadow: 0 0 8px #80ffea, 0 0 18px #80ffea66;
+    }
+    @keyframes glitch {
+      0% { text-shadow: 1px 0 red, -1px 0 cyan; }
+      50% { text-shadow: -1px 0 red, 1px 0 cyan; }
+      100% { text-shadow: 1px 0 red, -1px 0 cyan; }
+    }
+    .member {
+      border: 1px solid #444;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      background-color: #111;
     }
     footer {
-      background-color: #eee;
-      color: #666;
       text-align: center;
-      padding: 20px;
-      margin-top: 50px;
-      font-size: 0.85rem;
+      padding: 1rem;
+      border-top: 1px solid #444;
+      font-size: 0.8rem;
+      color: #777;
     }
-    a {
-      color: #b20000;
-      text-decoration: none;
+    code {
+      background: #222;
+      padding: 2px 6px;
+      border-radius: 4px;
     }
-    a:hover {
-      text-decoration: underline;
+    .barra {
+      border-left: 4px solid #80ffea;
+      padding-left: 1rem;
+      margin-bottom: 2rem;
     }
-    ul li {
-      margin-bottom: 10px;
+    @media (max-width: 600px) {
+      main {
+        padding: 1rem;
+        font-size: 0.95rem;
+      }
+      h2 {
+        font-size: 1.4rem;
+      }
     }
-  </style>
+    h1 {
+      color: #80ffea;
+      text-shadow: 0 0 8px #80ffea, 0 0 18px #80ffea66;
+    }
+</style>
 </head>
-<body>
-  <header>
-    <h1>CASO NAXX</h1>
-    <p class="subheader">Rede de abusos no Discord e o envolvimento não intencional de DECAY</p>
-  </header>
-
-  <div class="content">
-    <p><strong>Alerta digital</strong> — O caso NAXX chama atenção por envolver abuso virtual, manipulação e ameaças a menores no Discord. A usuária conhecida como <strong>NAXX</strong> se envolvia com crianças, pedia seus números e usava plataformas como <strong>mind-7.org</strong> para puxar dados pessoais e coagir vítimas.</p>
-
-    <h2>O papel de DECAY</h2>
-    <p>DECAY, que mantinha um relacionamento virtual com NAXX, não tinha conhecimento das práticas ilegais que ela realizava. Relatos indicam que ele não participava nem incentivava as ações dela, sendo usado como "fachada" para encobrir as atividades criminosas.</p>
-
-    <h2>Métodos utilizados por NAXX</h2>
-    <ul>
-      <li>Contato com menores de idade no Discord</li>
-      <li>Solicitação de números de telefone com falsas promessas</li>
-      <li>Uso de ferramentas como <strong>mind-7.org</strong> para puxar IPs, localizações e dados de operadora</li>
-      <li>Ameaças diretas com dados coletados, forçando silêncio ou submissão</li>
-    </ul>
-
-    <blockquote>
-      "Ela sabia minha localização só com meu número, me mostrou minha rua e disse que podia me achar. Fiquei em choque."
-      <br><em>— Vítima anônima</em>
-    </blockquote>
-
-    <h2>Como denunciar</h2>
-    <ul>
-      <li><a href="https://support.discord.com/hc/pt-br/requests/new" target="_blank">Denuncie no Discord</a></li>
-      <li><a href="https://new.safernet.org.br" target="_blank">Denúncia anônima na SaferNet</a></li>
-      <li><a href="https://delegaciavirtual.sinesp.gov.br" target="_blank">Boletim de Ocorrência virtual</a></li>
-    </ul>
-
-    <p>Denunciar é essencial. Plataformas precisam ser seguras para todos. Compartilhe este alerta.</p>
-  </div>
-
-  <footer>
-    <p>© 2025 Alerta Digital | Conteúdo baseado em relatos e investigações independentes. Este site não tem fins de incitação ao ódio, apenas informativo.</p>
-  </footer>
+<body oncontextmenu="return false" onkeydown="return !(event.keyCode==123 || (event.ctrlKey && event.key=='u'));">
+<header>
+<h1>111339</h1>
+<p>Observadores Invisíveis. Vigilância Anônima. Justiça Digital.</p>
+</header>
+<main>
+<section>
+<h2>Investigando Agora</h2>
+<div class="member">
+<ul>
+<li>🕵️francis.kwame027 no tiktok sofreu racismo. </li>
+</ul>
+</div>
+</section>
+<section>
+<h2>Missão</h2>
+<p>
+        111339 é uma iniciativa anônima que atua na investigação de crimes digitais em geral — como golpes, ameaças, pedofilia, racismo, abuso psicológico, perseguição e crimes de ódio. Acessamos e analisamos dados públicos e privados quando necessário.
+      </p>
+<p>
+        Não vazamos dados. Não expomos vítimas. Registramos com responsabilidade, e entregamos o necessário às autoridades quando for o caso.
+      </p>
+</section>
+<section>
+<h2>Equipe</h2>
+<div class="member">
+<p>O projeto 111339 é mantido por uma equipe anônima. Cada membro atua em áreas como coleta de dados, análise de comportamento, rastreio digital e arquivamento de evidências. Ninguém aqui usa nome. Ninguém aparece. Trabalhamos no escuro pra proteger quem tá na luz.</p>
+</div>
+</section>
+<section>
+<h2>Contato</h2>
+<p>Você pode entrar em contato via email:</p>
+<ul>
+<li>Email: <code>syncnull1@proton.me</code></li>
+</ul>
+<p>Se quiser denunciar algo para a 111339, envie prints, links ou relatos com o máximo de detalhes. Seu anonimato será respeitado.</p>
+</section>
+<section>
+<h2>Manifesto</h2>
+<div class="member">
+<p>"Não somos justiceiros. Somos vigilantes. Observamos tudo — o que está à mostra e o que está escondido. Não publicamos, não vazamos. Guardamos. Documentamos. Repassamos o necessário. O silêncio é parte da missão."</p>
+</div>
+</section>
+</main>
+<footer>
+<p>© 111339 — Projeto anônimo e independente. Atuando com cautela, inteligência e silêncio.</p>
+</footer>
 </body>
 </html>
